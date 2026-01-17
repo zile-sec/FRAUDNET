@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounts-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: accounts-service
+  template:
+    metadata:
+      labels:
+        app: accounts-service
+    spec:
+      containers:
+      - name: accounts-service
+        image: your-docker-hub-username/accounts-service:latest
+        ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: accounts-service  # This MUST match the URL in your web-server code
+spec:
+  selector:
+    app: accounts-service
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
