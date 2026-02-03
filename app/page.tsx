@@ -42,6 +42,8 @@ interface TransactionsResponse {
  * Uses buildApiUrl() to construct the correct URL based on environment:
  * - Development: http://localhost:3000/api/transactions
  * - Production (Vercel): https://{VERCEL_URL}/api/transactions
+ *
+ * Returns null if the API is unavailable or returns invalid data.
  */
 async function getTransactions(): Promise<TransactionsResponse | null> {
   try {
@@ -56,7 +58,19 @@ async function getTransactions(): Promise<TransactionsResponse | null> {
       return null
     }
 
-    return res.json()
+    // Check content type to ensure we're receiving JSON
+    const contentType = res.headers.get("content-type")
+    if (!contentType || !contentType.includes("application/json")) {
+      console.error("API did not return JSON response")
+      return null
+    }
+
+    const text = await res.text()
+    if (!text) {
+      return null
+    }
+
+    return JSON.parse(text) as TransactionsResponse
   } catch (error) {
     console.error("An error occurred while fetching transactions:", error)
     return null
